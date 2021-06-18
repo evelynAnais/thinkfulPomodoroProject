@@ -32,6 +32,8 @@ function TimerControl({ isTimerRunning, playPause }) {
               className="btn btn-secondary"
               data-testid="stop"
               title="Stop the session"
+              //onClick=
+              disabled={true}
             >
               <span className="oi oi-media-stop" />
             </button>

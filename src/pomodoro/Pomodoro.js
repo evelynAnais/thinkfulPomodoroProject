@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import useInterval from "../utils/useInterval";
+import { minutesToDuration } from '../utils/duration';
 import FocusControl from "./FocusControl";
 import BreakControl from "./BreakControl";
 import TimerControl from "./TimerControl";
@@ -56,14 +57,29 @@ function Pomodoro() {
   const [session, setSession] = useState(null);
 
   // ToDo: Allow the user to adjust the focus and break duration.
-  const focusDuration = 25;
-  const breakDuration = 5;
+  const [focusDuration, setFocusDuration] = useState(25);
+  const [breakDuration, setBreakDuration] = useState(5);
 
   /**
    * Custom hook that invokes the callback function every second
    *
    * NOTE: You will not need to make changes to the callback function
    */
+  
+  const focusMinus = () => {
+    setFocusDuration(Math.max(5, focusDuration - 5));
+  };
+  const focusPlus = () => {
+    setFocusDuration(Math.min(60, focusDuration + 5));
+  };
+
+  const breakMinus = () => {
+    setBreakDuration(Math.max(5, breakDuration - 5));
+  };
+  const breakPlus = () => {
+    setBreakDuration(Math.min(25, breakDuration + 5));
+  };
+
   useInterval(() => {
       if (session.timeRemaining === 0) {
         new Audio("https://bigsoundbank.com/UPLOAD/mp3/1482.mp3").play();
@@ -71,7 +87,7 @@ function Pomodoro() {
       }
       return setSession(nextTick);
     },
-    isTimerRunning ? 1000 : null
+    isTimerRunning ? 10 : null
   );
 
   /**
@@ -100,13 +116,20 @@ function Pomodoro() {
   return (
     <div className="pomodoro">
       <div className="row">
-        <FocusControl />
-        <BreakControl />  
+        <FocusControl focusMinus={focusMinus}
+        focusPlus={focusPlus} focusDuration={focusDuration}
+        />
+        <BreakControl breakMinus={breakMinus}
+        breakPlus={breakPlus} breakDuration={breakDuration}
+        />  
       </div>
         <TimerControl isTimerRunning={isTimerRunning}
           playPause={playPause} 
         />
-        <TimerDisplay session={session} />
+        <TimerDisplay session={session}
+          focusDuration={focusDuration}
+          breakDuration={breakDuration}
+        />
     </div>
   );
 }
