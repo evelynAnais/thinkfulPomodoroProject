@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import useInterval from "../utils/useInterval";
-import { minutesToDuration } from '../utils/duration';
 import FocusControl from "./FocusControl";
 import BreakControl from "./BreakControl";
 import TimerControl from "./TimerControl";
@@ -51,20 +50,10 @@ function nextSession(focusDuration, breakDuration) {
 }
 
 function Pomodoro() {
-  // Timer starts out paused
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  // The current session - null where there is no session running
-  const [session, setSession] = useState(null);
-
-  // ToDo: Allow the user to adjust the focus and break duration.
   const [focusDuration, setFocusDuration] = useState(25);
   const [breakDuration, setBreakDuration] = useState(5);
-
-  /**
-   * Custom hook that invokes the callback function every second
-   *
-   * NOTE: You will not need to make changes to the callback function
-   */
+  const [session, setSession] = useState(null);
   
   const focusMinus = () => {
     setFocusDuration(Math.max(5, focusDuration - 5));
@@ -74,12 +63,22 @@ function Pomodoro() {
   };
 
   const breakMinus = () => {
-    setBreakDuration(Math.max(5, breakDuration - 5));
+    setBreakDuration(Math.max(1, breakDuration - 1));
   };
   const breakPlus = () => {
-    setBreakDuration(Math.min(25, breakDuration + 5));
+    setBreakDuration(Math.min(15, breakDuration + 1));
   };
 
+  const stop = () => {
+    setIsTimerRunning(false);
+    setSession(null);
+  }
+
+  /**
+   * Custom hook that invokes the callback function every second
+   *
+   * NOTE: You will not need to make changes to the callback function
+   */
   useInterval(() => {
       if (session.timeRemaining === 0) {
         new Audio("https://bigsoundbank.com/UPLOAD/mp3/1482.mp3").play();
@@ -87,7 +86,7 @@ function Pomodoro() {
       }
       return setSession(nextTick);
     },
-    isTimerRunning ? 10 : null
+    isTimerRunning ? 1000 : null
   );
 
   /**
@@ -117,14 +116,20 @@ function Pomodoro() {
     <div className="pomodoro">
       <div className="row">
         <FocusControl focusMinus={focusMinus}
-        focusPlus={focusPlus} focusDuration={focusDuration}
+        focusDuration={focusDuration}
+        focusPlus={focusPlus} 
+        session={session}
         />
         <BreakControl breakMinus={breakMinus}
-        breakPlus={breakPlus} breakDuration={breakDuration}
+        breakDuration={breakDuration}
+        breakPlus={breakPlus}
+        session={session}
         />  
       </div>
         <TimerControl isTimerRunning={isTimerRunning}
           playPause={playPause} 
+          session={session}
+          stop={stop}
         />
         <TimerDisplay session={session}
           focusDuration={focusDuration}
